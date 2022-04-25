@@ -15,8 +15,10 @@
 # Author: Tom Runia
 # Date Created: 2018-08-03
 
+import os
 import numpy as np
 import cv2
+
 
 def make_colorwheel():
     """
@@ -149,11 +151,29 @@ def load_flow_to_numpy(path):
     data2D= np.resize(data,(w,h,2))
     return data2D
 
+def visualize_one_img():
+    flo = load_flow_to_numpy("/home/chen/datasets/kitti/tracking/flow_02/training/image_02/0003/000001.flo")
+    img = flow_to_image(flo)
+    cv2.imwrite("test.png",img)
+    #cv2.imshow("img",img)
+    #cv2.waitKey(0)
+
+
+def visualize_flow(img_path):
+    imgs_names = os.listdir(img_path)
+    sorted(imgs_names)
+    for name in imgs_names:
+        print(name)
+        flo = load_flow_to_numpy(os.path.join(imgs_names,name))
+        img = flow_to_image(flo)
+        #cv2.imshow("img",img)
+        #cv2.imwrite("")
+        cv2.waitKey(30)
+
+
 
 if __name__ == '__main__':
-    flo = load_flow_to_numpy("/home/chen/CLionProjects/CV_Tools/OpticalFlowVisualization/000000.flo")
-    img = flow_to_image(flo)
-    cv2.imshow("img",img)
-    cv2.waitKey(0)
+    #visualize_flow("/home/chen/datasets/kitti/tracking/flow_02/training/image_02/0003")
+    visualize_one_img()
 
 

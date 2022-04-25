@@ -14,3 +14,8 @@ include_directories(${TORCH_INCLUDE_DIRS})
 add_executable(OpticalFlowVisualization main.cpp Visualization.cpp)
 target_link_libraries(OpticalFlowVisualization  ${OpenCV_LIBRARIES} ${TORCH_LIBRARIES}
         TorchVision::TorchVision)
+
+
+add_executable(vis_feature vis_feature.cpp Visualization.cpp)
+target_link_libraries(vis_feature  ${OpenCV_LIBRARIES} ${TORCH_LIBRARIES}
+        TorchVision::TorchVision)
