@@ -84,7 +84,7 @@ void ReadCalibFile(const string &path){
 
 
 int main(){
-    const string calib_file = "/home/chen/CLionProjects/CV_Tools/KittiCalibParser/data/0000.txt";
+    const string calib_file = "/home/chen/datasets/kitti/tracking/data_tracking_calib/training/calib/0003.txt";
     ReadCalibFile(calib_file);
 
     double fx1 = P1(0,0);
