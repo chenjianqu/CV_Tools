@@ -26,13 +26,8 @@ void flow_track_test(cv::Mat &img1,cv::Mat img2)
 }
 
 
-
-
-
-int main ( int argc, char** argv )
+void BasicTest()
 {
-    cout << "OpenCV version : " << CV_VERSION << endl;
-
     Mat leftImg=imread("left.jpg",0);
     Mat rightImg=imread("right.jpg",0);
 
@@ -41,5 +36,36 @@ int main ( int argc, char** argv )
     waitKey ( 0 );
 
     destroyAllWindows();
+}
+
+
+void VideoTest()
+{
+    cv:: VideoCapture cap = cv::VideoCapture(0);
+    cap.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
+    cap.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
+    cv::Mat frame, img;
+    while(cap.isOpened()){
+        clock_t start = clock();
+        cap.read(frame);
+        if(frame.empty()){
+            std::cout << "Read frame failed!" << std::endl;
+            break;
+        }
+
+        cv::imshow("Test", frame);
+        if(cv::waitKey(1)== 27) break;
+    }
+}
+
+
+
+
+int main ( int argc, char** argv )
+{
+    cout << "OpenCV version : " << CV_VERSION << endl;
+
+    VideoTest();
+
     return 0;
 }
