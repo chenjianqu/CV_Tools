@@ -15,7 +15,7 @@ using namespace std;
 visualization_msgs::Marker BuildLineStripMarker(Eigen::Matrix<double,8,3> &corners,int id){
     visualization_msgs::Marker msg;
 
-    msg.header.frame_id="map";
+    msg.header.frame_id="camera";
     msg.header.stamp=ros::Time::now();
     msg.ns="box_strip";
     msg.action=visualization_msgs::Marker::ADD;
@@ -87,7 +87,7 @@ visualization_msgs::Marker BuildTextMarker(const std::string& text,const Eigen::
 {
     visualization_msgs::Marker msg;
 
-    msg.header.frame_id="map";
+    msg.header.frame_id="camera";
     msg.header.stamp=ros::Time::now();
     msg.ns="box_text";
     msg.action=visualization_msgs::Marker::ADD;
@@ -116,7 +116,7 @@ visualization_msgs::Marker BuildTextMarker(const std::string& text,const Eigen::
 visualization_msgs::Marker BuildSphereMarker(const Eigen::Vector3d &pos,double scale,int id)
 {
     visualization_msgs::Marker msg;
-    msg.header.frame_id="map";
+    msg.header.frame_id="camera";
     msg.header.stamp=ros::Time::now();
     msg.ns="box_sphere";
     msg.action=visualization_msgs::Marker::ADD;

@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <cstdio>
 #include <iostream>
 #include <algorithm>
 #include <fstream>
@@ -26,7 +26,25 @@
 #include "utils.h"
 
 using namespace std;
+namespace fs=std::filesystem;
 
+
+
+
+vector<fs::path> ReadNames(const string &data_path){
+    ///获取目录中所有的文件名
+     vector<fs::path> names;
+    if(names.empty()){
+        fs::path dir_path(data_path);
+        if(!fs::exists(dir_path))
+            return {};
+        fs::directory_iterator dir_iter(dir_path);
+        for(auto &it : dir_iter)
+            names.emplace_back(it.path().filename());
+        std::sort(names.begin(),names.end());
+    }
+    return names;
+}
 
 
 int main(int argc, char** argv)
@@ -39,22 +57,26 @@ int main(int argc, char** argv)
 
     ros::Publisher obj_pub=nh.advertise<visualization_msgs::MarkerArray>("fcos_3d_box",10);
 
-    string predict_path="/home/chen/CLionProjects/CV_Tools/cv_ws/src/FCOS_3DBox/demo/000000.txt";
+    string data_path="/home/chen/CLionProjects/CV_Tools/cv_ws/src/FCOS_3DBox/demo/0002/";
 
     Eigen::Matrix<double,8,3> corners_norm;
     corners_norm << 0,0,0,  0,0,1,  0,1,1,  0,1,0,  1,0,0,  1,0,1,  1,1,1,  1,1,0;
 
     Eigen::Vector3d offset(0.5,1,0.5);//预测结果所在的坐标系与相机坐标系之间的偏移
-
     corners_norm = corners_norm.array().rowwise() - offset.transpose().array();//将每个坐标减去偏移量
-
     cout<<"corners_norm\n"<<corners_norm<<endl;
+
+    ///获取所有的文件名
+    auto names = ReadNames(data_path);
+    int Num = names.size();
+    int idx=0;
 
     while(ros::ok())
     {
         visualization_msgs::MarkerArray markers;
 
-        ifstream fp(predict_path); //定义声明一个ifstream对象，指定文件路径
+        ifstream fp(data_path + names[idx].string());
+        idx = (idx+1)%Num;
         string line;
         int index=0;
         while (getline(fp,line)){ //循环读取每行数据

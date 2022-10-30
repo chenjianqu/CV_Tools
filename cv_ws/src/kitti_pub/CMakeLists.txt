@@ -15,6 +15,8 @@ find_package(catkin REQUIRED COMPONENTS
         image_transport
 )
 
+find_package(Eigen3 REQUIRED)
+include_directories(${Eigen3_INCLUDE_DIRS})
 
 
 find_package(OpenCV 3.4 REQUIRED)
@@ -44,5 +46,9 @@ message("${src_SOURCES}")
 
 add_executable(kitti_pub src/kitti_pub.cpp)
 target_link_libraries(kitti_pub ${catkin_LIBRARIES} ${OpenCV_LIBS})
+
+add_executable(pub_oxts_pose src/pub_oxts_pose.cpp)
+target_link_libraries(pub_oxts_pose ${catkin_LIBRARIES} ${OpenCV_LIBS})
+
 
 
