@@ -11,9 +11,7 @@
 #include "dataloader.h"
 #include "image_viewer.h"
 
-using namespace std;
 namespace fs=std::filesystem;
-
 
 inline cv::Scalar_<unsigned int> getRandomColor(){
     static std::default_random_engine rde;
@@ -71,26 +69,37 @@ int main(int argc,char** argv) {
     Dataloader dataloader(img_dir);
     ImageViewer imageViewer;
 
+    TicToc t_all,t_step;
+
     while(true){
+        t_all.Tic();
+        t_step.Tic();
+
         cv::Mat color = dataloader.LoadMonoImages();
+        cout<<"LoadMonoImages:"<<t_step.TocThenTic()<<" ms"<<endl;
 
         if(color.empty()){
             break;
         }
 
         auto [seg_label,cate_score,cate_label] = LoadMaskTensor(dataloader.get_seq_id(),mask_dir);
+        cout<<"LoadMaskTensor:"<<t_step.TocThenTic()<<" ms"<<endl;
 
         cv::Mat img_show;
 
         if(seg_label.defined()){
             cv::Mat mask_img = VisualTensor(seg_label);
-            cv::scaleAdd(color,0.5,mask_img,img_show);
+            cv::scaleAdd(mask_img,0.8,color,img_show);
         }
         else{
             img_show = color;
         }
 
+        cout<<"VisualTensor && scaleAdd："<<t_step.TocThenTic()<<" ms"<<endl;
+
         imageViewer.ImageShow(img_show,30);
+
+        cout<<"T_all:"<<t_all.Toc()<<" ms"<<endl<<endl;
     }
 
     return 0;

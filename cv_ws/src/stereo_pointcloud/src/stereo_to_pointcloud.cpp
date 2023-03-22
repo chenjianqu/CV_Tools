@@ -79,12 +79,16 @@ PointCloud::Ptr StereoCalculatePointCloud(cv::Mat &left,cv::Mat &disp){
 
     for (int v = 0; v < left.rows; v++){
         for (int u = 0; u < left.cols; u++) {
-            if (disp.at<float>(v, u) <= 0.5 || disp.at<float>(v, u) >= 96.0)
+            float disparity = disp.at<float>(v, u);
+            if(disparity!=disparity || disparity<0.01) //值为NaN:disparity!=disparity
+                continue;
+            float depth = fx * baseline / disparity;
+            if (depth <= 0.5 || depth >= 96.0)
                 continue;
             // 根据双目模型计算 point 的位置
             float x = (u - cx) / fx;
             float y = (v - cy) /fy;
-            float depth = fx * baseline / (disp.at<float>(v, u));
+
             auto pixel = left.at<cv::Vec3b>(v,u);
             PointT p(pixel[0],pixel[1],pixel[2]);
             p.x = x * depth;
@@ -123,8 +127,12 @@ int main(int argc, char **argv)
 
     vector<fs::path> left_names=GetDirectoryFileNames(left_image_dir);
 
+    TicToc t_all,t_step;
+
     ros::Rate rate(30);
     for(auto &name:left_names){
+        t_all.Tic();
+
         if(!ros::ok()){
             break;
         }
@@ -142,19 +150,27 @@ int main(int argc, char **argv)
 
         cout<<disp_path<<endl;
 
+        t_step.Tic();
         cv::Mat left = cv::imread(left_path.string());
+        cout<<"imread left:"<<t_step.TocThenTic()<<" ms"<<endl;
+
         cv::Mat disp_raw = cv::imread(disp_path.string(), -1);
         cv::Mat disp;
-        disp_raw.convertTo(disp, CV_32F,1./256.);
+        disp_raw.convertTo(disp, CV_32F,1./16.);
+        cout<<"imread disp:"<<t_step.TocThenTic()<<" ms"<<endl;
 
         auto cloud=StereoCalculatePointCloud(left,disp);
         cout<<cloud->points.size()<<endl;
+        cout<<"StereoCalculatePointCloud:"<<t_step.TocThenTic()<<" ms"<<endl;
 
         Pub(*cloud,"/stereo_pointcloud");
 
         ros::spinOnce();
+        cout<<"Pub:"<<t_step.TocThenTic()<<" ms"<<endl;
+
         rate.sleep();
 
+        cout<<"t_all:"<<t_all.Toc()<<" ms"<<endl<<endl;
     }
 
 }

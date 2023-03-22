@@ -40,9 +40,11 @@ link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
 
-
-add_executable(stereo_to_pointcloud src/main.cpp src/io_utils.cpp)
+add_executable(stereo_to_pointcloud src/stereo_to_pointcloud.cpp src/io_utils.cpp)
 target_link_libraries(stereo_to_pointcloud ${catkin_LIBRARIES} ${OpenCV_LIBS} ${PCL_LIBRARIES} ${spdlog_LIBRARIES})
+
+add_executable(build_pointcloud src/build_pointcloud.cpp src/io_utils.cpp)
+target_link_libraries(build_pointcloud ${catkin_LIBRARIES} ${OpenCV_LIBS} ${PCL_LIBRARIES} ${spdlog_LIBRARIES})
 
 
 

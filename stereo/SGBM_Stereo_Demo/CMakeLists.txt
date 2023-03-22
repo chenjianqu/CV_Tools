@@ -18,8 +18,12 @@ link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
 
-add_executable(SGBM_Stereo_Demo main.cpp)
-target_link_libraries(SGBM_Stereo_Demo ${OpenCV_LIBS} ${PCL_LIBRARIES})
+add_executable(SGBM_Test main.cpp)
+target_link_libraries(SGBM_Test ${OpenCV_LIBS} ${PCL_LIBRARIES})
+
+add_executable(sgbm_demo sgbm_demo.cpp io_utils.cpp)
+target_link_libraries(sgbm_demo ${OpenCV_LIBS} ${PCL_LIBRARIES})
+
 
 
 

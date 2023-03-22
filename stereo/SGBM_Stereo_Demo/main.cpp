@@ -134,14 +134,76 @@ void calDispWithSGBM(cv::Mat imgL, cv::Mat imgR, cv::Mat &imgDisparity8U)
 }
 
 
-
-
-
-int main(int argc, char **argv)
-{
+void SGBM_KITTI_Test(){
     //--读取图像
     string left_path="/home/chen/datasets/kitti/tracking/data_tracking_image_2/training/image_02/0003/000000.png";
     string right_path="/home/chen/datasets/kitti/tracking/data_tracking_image_3/training/image_03/0003/000000.png";
+
+    cv::Mat imgLeft = cv::imread(left_path);
+    cv::Mat imgRight = cv::imread(right_path);
+
+    cv::Mat imgL = cv::imread(left_path, 0);
+    cv::Mat imgR = cv::imread(right_path, 0);
+
+    cv::Ptr<cv::StereoSGBM> sgbm = cv::StereoSGBM::create(0, 96, 9,
+                                                          8 * 9 * 9, 32 * 9 * 9,1, 63,
+                                                          10, 100, 32
+    );    // 调用OpenCv中的SGBM算法，用于计算左右图像的视差
+            cv::Mat disparity_sgbm, disparity;
+            sgbm->compute(imgL, imgR, disparity_sgbm);   //将视差的计算结果放入disparity_sgbm矩阵中
+            disparity_sgbm.convertTo(disparity, CV_32F, 1.0 / 16.0f); //将矩阵disparity_sgbm转换为括号中的格式(32位空间的单精度浮点型矩阵)
+
+            cv::imshow("test",disparity_sgbm);
+            cv::waitKey(0);
+
+
+            cv::Mat disp=disparity;
+
+            ///KITTI
+            double fx=721.5377;
+            double fy=721.5377;
+            double cx=609.5593;
+            double cy=172.8540;
+            double bf=387.5744/fx;
+
+            pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
+
+            for (int v = 0; v < imgLeft.rows; v++){
+                for (int u = 0; u < imgLeft.cols; u++) {
+                    if (disp.at<float>(v, u) <= 0.0 || disp.at<float>(v, u) >= 96.0) continue;
+                    // 根据双目模型计算 point 的位置
+                    double x = (u - cx) / fx;
+                    double y = (v - cy) / fy;
+                    double depth = fx * bf / (disp.at<float>(v, u));
+                    auto pixel = imgLeft.at<cv::Vec3b>(v,u);
+                    PointT p(pixel[0],pixel[1],pixel[2]);
+                    p.x = x * depth;
+                    p.y = y * depth;
+                    p.z = depth;
+                    cloud->push_back(p);
+                    if(v==u){
+                        cout<<disp.at<float>(v, u)<<endl;
+                    }
+                }
+            }
+
+            cout<<cloud->points.size()<<endl;
+
+            pcl::visualization::CloudViewer viewer ("test");
+            viewer.showCloud(cloud);
+            while (!viewer.wasStopped()){ };
+
+}
+
+
+
+void SGBM_ZED_Test(){
+
+    //string left_path="/home/chen/datasets/MyData/ZED_data/un_cam0/road_3/005700.png";
+    //string right_path="/home/chen/datasets/MyData/ZED_data/un_cam1/road_3/005700.png";
+
+    string left_path="/home/chen/datasets/MyData/ZED_data/cam0/road_1/003014.png";
+    string right_path="/home/chen/datasets/MyData/ZED_data/cam1/road_1/003014.png";
 
     cv::Mat imgLeft = cv::imread(left_path);
     cv::Mat imgRight = cv::imread(right_path);
@@ -150,9 +212,8 @@ int main(int argc, char **argv)
     cv::Mat imgL = cv::imread(left_path, 0);
     cv::Mat imgR = cv::imread(right_path, 0);
 
-    cv::Ptr<cv::StereoSGBM> sgbm = cv::StereoSGBM::create(
-            0, 96, 9, 8 * 9 * 9, 32 * 9 * 9,
-            1, 63, 10, 100, 32);    // 调用OpenCv中的SGBM算法，用于计算左右图像的视差
+    cv::Ptr<cv::StereoSGBM> sgbm = cv::StereoSGBM::create(0, 96, 9,
+                                                          8 * 9 * 9, 32 * 9 * 9,1, 63, 10, 100, 32);    // 调用OpenCv中的SGBM算法，用于计算左右图像的视差
     cv::Mat disparity_sgbm, disparity;
     sgbm->compute(imgL, imgR, disparity_sgbm);   //将视差的计算结果放入disparity_sgbm矩阵中
     disparity_sgbm.convertTo(disparity, CV_32F, 1.0 / 16.0f); //将矩阵disparity_sgbm转换为括号中的格式(32位空间的单精度浮点型矩阵)
@@ -160,15 +221,22 @@ int main(int argc, char **argv)
     cv::imshow("test",disparity_sgbm);
     cv::waitKey(0);
 
+    cv::imwrite("disp.png",disparity_sgbm);
 
     cv::Mat disp=disparity;
 
-    double fx=721.5377;
-    double fy=721.5377;
-    double cx=609.5593;
-    double cy=172.8540;
-    double bf=387.5744/fx;
-    //double bf=0.55;
+    ///ZED un
+    /*double fx=5.7817315673828125e+02;
+    double fy=6.6596881103515625e+02;
+    double cx=6.7666424560546875e+02;
+    double cy=3.6173339843750000e+02;*/
+
+    double fx=701.406049185687;
+    double fy=700.7199834541797;
+    double cx=663.9703743586792;
+    double cy=362.02045484177154;
+
+    double bf=0.12;
 
     pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
 
@@ -186,10 +254,9 @@ int main(int argc, char **argv)
             p.z = depth;
             cloud->push_back(p);
             if(v==u){
-                cout<<disp.at<float>(v, u)<<" ";
+                cout<<disp.at<float>(v, u)<<endl;
             }
         }
-
     }
 
     cout<<cloud->points.size()<<endl;
@@ -198,7 +265,15 @@ int main(int argc, char **argv)
     viewer.showCloud(cloud);
     while (!viewer.wasStopped()){ };
 
+}
 
+
+int main(int argc, char **argv)
+{
+
+    //SGBM_ZED_Test();
+
+    SGBM_KITTI_Test();
 
     return 0;
 }

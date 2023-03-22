@@ -20,7 +20,8 @@ public:
     img_width(img_width_),img_height(img_height_),
     fx(fx_),fy(fy_),cx(cx_),cy(cy_){}
 
-    PinholeCalib(const std::string &file_name){
+
+    explicit PinholeCalib(const std::string &file_name){
         cv::FileStorage fs(file_name, cv::FileStorage::READ);
         if(!fs.isOpened()){
             throw std::runtime_error(std::string("ERROR: Wrong path to settings:"+file_name));
@@ -120,42 +121,26 @@ public:
         fy * p_d(1) + cy;
     }
 
+    /**
+     * 得到矫正映射图，并得到新的内参。
+     */
+    void InitUndistortRectifyMap(){
+        ///注意，执行矫正了，图像的内参改变了
+        const double alpha=0;//值为0,损失最多的像素，没有黑色边框；值为1时，所有像素保留，但存在黑色边框。
+        cv::Mat new_K0 = cv::getOptimalNewCameraMatrix(
+                GetK(),GetD(),
+                GetImageSize(),alpha,
+                GetImageSize());
 
-    cv::Mat initUndistortRectifyMap(cv::Mat& map1, cv::Mat& map2, cv::Mat rmat = cv::Mat::eye( 3, 3, CV_32F )) const {
-        cv::Mat mapX = cv::Mat::zeros(img_height, img_width, CV_32F);
-        cv::Mat mapY = cv::Mat::zeros(img_height, img_width, CV_32F);
+        cv::initUndistortRectifyMap(
+                GetK(),GetD(),cv::Mat(),new_K0,
+                GetImageSize(),CV_16SC2,undist_map1,undist_map2);
 
-        Eigen::Matrix3f R, R_inv;
-        cv::cv2eigen(rmat, R);
-        R_inv = R.inverse();
-
-        Eigen::Matrix3f K_rect;
-        K_rect << fx, 0, cx,
-        0, fy, cy,
-        0, 0, 1;
-
-        Eigen::Matrix3f K_rect_inv = K_rect.inverse();
-
-        for (int v = 0; v < img_height; ++v){
-            for (int u = 0; u < img_width; ++u){
-                Eigen::Vector3f xo;
-                xo << u, v, 1;
-
-                Eigen::Vector3f uo = R_inv * K_rect_inv * xo;
-                Eigen::Vector2d p;
-                spaceToPlane(uo.cast<double>(), p);
-
-                mapX.at<float>(v,u) = p(0);
-                mapY.at<float>(v,u) = p(1);
-            }
-        }
-
-        cv::convertMaps(mapX, mapY, map1, map2, CV_32FC1, false);
-
-        cv::Mat K_rect_cv;
-        cv::eigen2cv(K_rect, K_rect_cv);
-        return K_rect_cv;
+        SetIntrinsics(new_K0.at<double>(0,0),new_K0.at<double>(1,1),
+                      new_K0.at<double>(0,2),new_K0.at<double>(1,2));
+        SetDistortionParameters(0,0,0,0);
     }
+
 
     void SetDistortionParameters(float k1_,float k2_,float p1_,float p2_){
         k1 = k1_;
@@ -169,6 +154,18 @@ public:
         fy = fy_;
         cx = cx_;
         cy = cy_;
+    }
+
+    [[nodiscard]] cv::Mat GetK() const{
+        return cv::Mat_<double>(3,3)<<fx,0,cx,0,fy,cy,0,0,1;
+    }
+
+    [[nodiscard]] cv::Mat GetD() const{
+        return cv::Mat_<double>(5,1)<<k1,k2,0,p1,p2;
+    }
+
+    [[nodiscard]] cv::Size GetImageSize() const{
+        return {img_width,img_height};
     }
 
 private:
@@ -281,22 +278,14 @@ int main(int argc,char** argv) {
     std::shared_ptr<PinholeCalib> left_cam = std::make_shared<PinholeCalib>(left_cam_param_path.string());
     std::shared_ptr<PinholeCalib> right_cam;
 
-    ///注意，执行矫正了，图像的内参改变了
-    cv::Mat un_K = left_cam->initUndistortRectifyMap(left_cam->undist_map1,left_cam->undist_map2);
-    left_cam->SetIntrinsics(un_K.at<float>(0,0),un_K.at<float>(1,1),
-            un_K.at<float>(0,2),un_K.at<float>(1,2));
-    left_cam->SetDistortionParameters(0,0,0,0);
+    left_cam->InitUndistortRectifyMap();
     left_cam->writeToYamlFile("cam0.yaml");
 
     if(is_stereo){
         right_cam = std::make_shared<PinholeCalib>(right_cam_param_path.string());
-        cv::Mat un_K1 = right_cam->initUndistortRectifyMap(right_cam->undist_map1,right_cam->undist_map2);
-        right_cam->SetIntrinsics(un_K1.at<float>(0,0),un_K1.at<float>(1,1),
-                un_K1.at<float>(0,2),un_K1.at<float>(1,2));
-        right_cam->SetDistortionParameters(0,0,0,0);
+        right_cam->InitUndistortRectifyMap();
         right_cam->writeToYamlFile("cam1.yaml");
     }
-
 
     vector<fs::path> left_names = GetDirectoryFileNames(left_img_dir);
 
@@ -328,6 +317,7 @@ int main(int argc,char** argv) {
                 cv::imwrite(right_output_path.string(),un_image1);
             }
 
+            ///可视化
             cv::Mat img_show_raw,img_show_un;
             cv::hconcat(vector<cv::Mat>{img0_raw,img1_raw},img_show_raw);
             cv::hconcat(vector<cv::Mat>{un_image0,un_image1},img_show_un);
