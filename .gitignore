@@ -2,7 +2,6 @@
 */*/.idea/
 */*/*/.idea/
 */*/*/*/.idea/
-*/build/
 cv_ws/devel/
 */cmake-build-debug/
 */*/cmake-build-debug/
@@ -12,5 +11,13 @@ cv_ws/devel/
 */*/bin/
 /*/*/bin/
 /*/*/*/bin/
+*/lib/
+*/*/lib/
+/*/*/lib/
+/*/*/*/lib/
+*/build/
+*/*/build/
+/*/*/build/
+/*/*/*/build/
 
 
