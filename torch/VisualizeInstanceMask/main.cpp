@@ -83,43 +83,7 @@ int main(int argc,char** argv) {
         }
 
         auto [seg_label,cate_score,cate_label] = LoadMaskTensor(dataloader.get_seq_id(),mask_dir);
-
-        ///根据类别或分数剔除某些Mask
-//        #只保留person car的类别
-//        # vis_inds = cate_label == 0
-//        # vis_inds = vis_inds + (cate_label == 1)
-//        # vis_inds = vis_inds + (cate_label == 2)
-//        # vis_inds = vis_inds + (cate_label == 3)
-//        # vis_inds = vis_inds + (cate_label == 5)
-//        # seg_label = seg_label[vis_inds]
-//        # cate_label = cate_label[vis_inds]
-        //        # cate_score = cate_score[vis_inds]
-
-        //cout<<"cate_label size:"<<cate_label.sizes()<<endl;
-        //cout<<"cate_score size:"<<cate_score.sizes()<<endl;
-        //cout<<"seg_label size:"<<seg_label.sizes()<<endl;
-
-        torch::Tensor vis_inds = cate_label == 0;
-        //vis_inds += (cate_label == 1);
-        vis_inds=vis_inds.toType(torch::kLong);
-        auto index = vis_inds.nonzero().squeeze();
-
-        //cout<<"vis_inds size:"<<vis_inds.sizes()<<endl;
-
-
-        cate_label = cate_label.index_select(0,index);
-        cate_score = cate_score.index_select(0,index);
-
-        //cout<<"*cate_label size:"<<cate_label.sizes()<<endl;
-        //cout<<"*cate_score size:"<<cate_score.sizes()<<endl;
-
-        seg_label = seg_label.index_select(0,index);
-        //cout<<"*seg_label size:"<<seg_label.sizes()<<endl;
-
-        //cout<<"cate_label:"<<cate_label<<endl;
-        //cout<<"cate_score:"<<cate_score<<endl;
-
-       // cout<<"LoadMaskTensor:"<<t_step.TocThenTic()<<" ms"<<endl;
+        cout<<"LoadMaskTensor:"<<t_step.TocThenTic()<<" ms"<<endl;
 
         cv::Mat img_show;
 
@@ -131,7 +95,7 @@ int main(int argc,char** argv) {
             img_show = color;
         }
 
-        //cout<<"VisualTensor && scaleAdd："<<t_step.TocThenTic()<<" ms"<<endl;
+        cout<<"VisualTensor && scaleAdd："<<t_step.TocThenTic()<<" ms"<<endl;
 
         imageViewer.ImageShow(img_show,30);
 

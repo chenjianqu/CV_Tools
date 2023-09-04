@@ -74,11 +74,18 @@ void VideoSplit()
 }
 
 
+void PrintSupportVideoEncoding(){
+    VideoWriter outputVideo;
+    outputVideo.open("test.mp4", -1, 30, Size(1920, 1080), true);
+}
+
+
 int main(int argc, char** argv) {
 
 
-    VideoSplit();
+    //VideoSplit();
 
+    PrintSupportVideoEncoding();
 
     return 0;
 }
