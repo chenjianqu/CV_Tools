@@ -184,8 +184,8 @@ save_path=/home/cjq/dataset/YT_gaojia/bag_mask_binary_manual_erode
 示例：
 
 ```shell
-mask_dir=/home/cjq/dataset/YT_city/sfm/2022-10-17-12-04-27_mini_400/mask
-rgb_dir=/home/cjq/dataset/YT_city/sfm/2022-10-17-12-04-27_mini_400/images
+mask_dir=/media/cjq/新加卷/datasets/220Dataset/22_GND_vslam/20230809_A12/20230805151650.846/dense/road_mask
+rgb_dir=/media/cjq/新加卷/datasets/220Dataset/22_GND_vslam/20230809_A12/20230805151650.846/dense/images
 
 ./mask_rgb_vis ${mask_dir} ${rgb_dir}
 ```
@@ -193,7 +193,7 @@ rgb_dir=/home/cjq/dataset/YT_city/sfm/2022-10-17-12-04-27_mini_400/images
 或
 
 ```shell
-/home/cjq/CLionProjects/CV_Tools/opencv/MaskUtils/bin/mask_rgb_vis ./mask_rgb_vis ./mask ./images
+/home/cjq/CLionProjects/CV_Tools/opencv/MaskUtils/bin/mask_rgb_vis  ./mask ./images
 ```
 
 

@@ -50,7 +50,6 @@ int main(int argc,char** argv) {
 
     if(mask_names.size() != rgb_names.size()){
         cerr<<"mask_names.size() != rgb_names.size()"<<endl;
-        return -1;
     }
 
     ImageViewer viewer;
@@ -82,7 +81,7 @@ int main(int argc,char** argv) {
             cv::imwrite(save_img_path,img_vis);
         }
 
-        viewer.ImageShow(img_vis,30);
+        viewer.ImageShow(img_vis,100);
     }
 
 

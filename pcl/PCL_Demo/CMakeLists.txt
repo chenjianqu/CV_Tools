@@ -1,12 +1,17 @@
 cmake_minimum_required(VERSION 2.6)
 project(PCL_Demo)
 
-
+set(CMAKE_CXX_STANDARD 17)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+
+add_definitions(-DSPDLOG_FMT_EXTERNAL)
+
+find_package(Eigen3 REQUIRED)
+include_directories(${EIGEN3_INCLUDE_DIRS})
 
 
 #CUDA
-find_package(CUDA 10.2 REQUIRED)
+find_package(CUDA 11.4 REQUIRED)
 include_directories(${CUDA_INCLUDE_DIRS})
 
 
@@ -27,11 +32,15 @@ add_definitions(${PCL_DEFINITIONS})
 
 message("${PCL_LIBRARIES}")
 
-add_executable(PCL_Test main.cpp)
+add_executable(PCL_Test src/main.cpp)
 target_link_libraries (PCL_Test ${PCL_LIBRARIES} ${CUDA_LIBRARIES})
 
-add_executable(icp_test icp_test.cpp)
+add_executable(icp_test src/icp_test.cpp)
 target_link_libraries (icp_test ${PCL_LIBRARIES} ${CUDA_LIBRARIES})
+
+
+add_executable(surface_reconstruct_test src/surface_reconstruct_test.cpp)
+target_link_libraries (surface_reconstruct_test ${PCL_LIBRARIES} ${CUDA_LIBRARIES})
 
 
 

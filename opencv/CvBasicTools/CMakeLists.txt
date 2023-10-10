@@ -49,4 +49,4 @@ target_link_libraries(main  ${THIRTY_LIBS} )
 add_executable(read_dir_to_video src/read_dir_to_video.cpp)
 target_link_libraries(read_dir_to_video  ${THIRTY_LIBS} )
 
-
+message(STATUS "XXXXXXXX"${CUDA_TOOLKIT_ROOT_DIR})

@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set( EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 
-find_package( OpenCV 3.4.16 REQUIRED )
+find_package( OpenCV 3.4 REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 
